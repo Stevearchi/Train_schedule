@@ -20,12 +20,21 @@ var database = firebase.database();
 // write functions()
 database.ref('trainSchedule').on("child_added", function (childSnapshot) {
     console.log(childSnapshot.val().trainName)
-    nextArrival = 0;
-    minutesAway = 0;
+    var nextArrival = 0;
+    var currentTime = moment();
+    var firstTrainMoment = moment(childSnapshot.val().firstTrainTime, 'HH:mm');
+    var frequency = parseInt(childSnapshot.val().frequency);
+    console.log(childSnapshot.val().firstTrainTime)
+    console.log(firstTrainMoment.format('MMMM DD YYYY, H:MM:ss'))
+    var diffTime = currentTime.diff(firstTrainMoment, 'minutes');
+    var tRemainder = diffTime % frequency;
+    var minutesAway = frequency - tRemainder;
+    var nextArrival = moment().add(minutesAway, "minutes");
+    nextArrival = nextArrival.format('HH:mm');
     // add tr and tds to table
     newtd = '<td>' + childSnapshot.val().trainName + '</td>';
     $('#trainTable').append('<tr class="table-info">' + newtd + '<td>' + childSnapshot.val().destination +
-        '<td>' + childSnapshot.val().frequency + '<td>' + nextArrival + '<td>' + minutesAway + '</td></tr>')
+        '<td>' + frequency + '<td>' + nextArrival + '<td>' + minutesAway + '</td></tr>');
 
     // $('#trainTable').append('</tr>')
 })
